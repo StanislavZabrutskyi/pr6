@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Автозапчастини — Кошик</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff9800, #ff5722, #e91e63, #9c27b0);
+    background-size: 400% 400%;
+    animation: gradientMove 10s ease infinite;
+}
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+  .wrap{
+    max-width:900px;
+    margin:auto;
+    background:#ffffffd0;
+    padding:20px;
+    border-radius:10px;
+  }
+  .product{
+    background:#fff;
+    padding:10px;
+    border-radius:6px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  button{cursor:pointer;padding:6px 10px;border:0;border-radius:6px;background:#ffd400;}
+  table{width:100%;border-collapse:collapse;margin-top:15px;background:#fff}
+  th,td{padding:8px;border-bottom:1px solid #ddd}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Каталог товарів</h2>
+  <div id="products"></div>
+
+  <hr>
+  <h2>Кошик</h2>
+  <div id="cart"></div>
+</div>
+
+<script>
+const PRODUCTS=[
+ {id:1,name:"Фільтр повітря",price:450},
+ {id:2,name:"Свічка NGK",price:220},
+ {id:3,name:"Гальмівні колодки",price:1200},
+ {id:4,name:"Масляний фільтр",price:380},
+ {id:5,name:"Термостат",price:760},
+
+ {id:7,name:"Комплект зчеплення з маховиком ",price:50100}
+];
+let cart=[];
+
+function renderProducts(){
+  const box=document.getElementById('products');
+  box.innerHTML="";
+  PRODUCTS.forEach(p=>{
+    box.innerHTML+=`
+      <div class='product'>
+        <span>${p.name} — ${p.price} грн</span>
+        <button onclick='add(${p.id})'>Додати</button>
+      </div>`;
+  });
+}
+
+function add(id){
+  const item=cart.find(x=>x.id===id);
+  if(item) item.qty++;
+  else cart.push({id,qty:1});
+  renderCart();
+}
+
+function changeQty(id,val){
+  const item=cart.find(x=>x.id===id);
+  if(item){ item.qty=val; if(val<=0) cart=cart.filter(x=>x.id!==id);} 
+  renderCart();
+}
+
+function removeItem(id){ cart=cart.filter(x=>x.id!==id); renderCart(); }
+
+function renderCart(){
+  const box=document.getElementById('cart');
+  if(cart.length===0){ box.innerHTML="Кошик порожній"; return; }
+
+  let html=`<table><tr><th>Назва</th><th>Ціна</th><th>К-сть</th><th>Разом</th><th></th></tr>`;
+  let sum=0;
+  cart.forEach(c=>{
+    const p=PRODUCTS.find(x=>x.id===c.id);
+    const s=p.price*c.qty; sum+=s;
+    html+=`<tr>
+      <td>${p.name}</td>
+      <td>${p.price}</td>
+      <td><input type='number' value='${c.qty}' min='1' onchange='changeQty(${c.id},this.value)' style='width:60px'></td>
+      <td>${s}</td>
+      <td><button onclick='removeItem(${c.id})'>X</button></td>
+    </tr>`;
+  });
+  html+=`</table><h3>Разом: ${sum} грн</h3>`;
+  box.innerHTML=html;
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
